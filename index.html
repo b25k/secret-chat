@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Chat Secret">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Chat Secret</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-startup-image" href="/icons/icon-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6ee7b7;
+      --accent-dim: rgba(110,231,183,0.12);
+      --accent-glow: rgba(110,231,183,0.25);
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --text-dim: #999;
+      --me-bg: #1a2e24;
+      --me-border: rgba(110,231,183,0.3);
+      --them-bg: #1a1a1a;
+      --them-border: rgba(255,255,255,0.08);
+      --radius: 16px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    /* ── SETUP SCREEN ── */
+    #setup {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      z-index: 100;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #setup.hide {
+      opacity: 0;
+      transform: scale(0.96);
+      pointer-events: none;
+    }
+
+    .setup-inner {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .setup-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+    .setup-logo .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .setup-logo span {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .setup-title {
+      font-size: 28px;
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .setup-title strong { font-weight: 500; }
+    .setup-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: var(--text-muted); }
+    .field input:focus { border-color: rgba(110,231,183,0.4); }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      color: #0a0a0a;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+      color: var(--text-dim);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 1.5rem 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider span {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── iOS INSTALL PROMPT ── */
+    #ios-prompt {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    #ios-prompt.visible { display: block; }
+    #ios-prompt p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    #ios-prompt strong { color: var(--accent); }
+    .ios-steps {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ios-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .ios-step .n {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── CHAT SCREEN ── */
+    #chat {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #chat.visible { opacity: 1; }
+
+    /* Header */
+    #header {
+      padding: calc(var(--safe-top) + 14px) 1rem 14px;
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    #status-dot.online {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    #room-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #status-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #notif-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    #notif-btn.enabled {
+      color: var(--accent);
+      border-color: rgba(110,231,183,0.3);
+      background: var(--accent-dim);
+    }
+    #notif-btn svg { width: 12px; height: 12px; }
+
+    /* Messages */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 1rem 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    #messages::-webkit-scrollbar { display: none; }
+
+    .msg-wrap {
+      display: flex;
+      flex-direction: column;
+      animation: msgIn 0.25s ease;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-wrap.me { align-items: flex-end; }
+    .msg-wrap.them { align-items: flex-start; }
+
+    .msg-sender {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .msg {
+      max-width: min(75%, 320px);
+      padding: 10px 14px;
+      font-size: 15px;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .msg-wrap.me .msg {
+      background: var(--me-bg);
+      border: 1px solid var(--me-border);
+      border-radius: 16px 16px 4px 16px;
+      color: var(--text);
+    }
+    .msg-wrap.them .msg {
+      background: var(--them-bg);
+      border: 1px solid var(--them-border);
+      border-radius: 16px 16px 16px 4px;
+      color: var(--text);
+    }
+
+    .msg-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .date-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .date-sep::before, .date-sep::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .date-sep span {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* Typing indicator */
+    #typing {
+      padding: 4px 1rem;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Input bar */
+    #input-bar {
+      padding: 10px 12px calc(var(--safe-bottom) + 10px);
+      background: rgba(10,10,10,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 11px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.4;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    #input::placeholder { color: var(--text-muted); }
+    #input:focus { border-color: rgba(110,231,183,0.3); }
+
+    #send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    #send-btn:active { transform: scale(0.9); }
+    #send-btn:disabled { opacity: 0.3; }
+    #send-btn svg { width: 18px; height: 18px; fill: #0a0a0a; }
+
+    /* Empty state */
+    #empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+    #empty .icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══ -->
+<div id="setup">
+  <div class="setup-inner">
+    <div class="setup-logo">
+      <div class="dot"></div>
+      <span>Canal privé</span>
+    </div>
+
+    <h1 class="setup-title">Chat <strong>secret</strong></h1>
+    <p class="setup-sub">Chiffré, invisible, juste entre vous deux.</p>
+
+    <!-- iOS install hint -->
+    <div id="ios-prompt">
+      <p>Pour recevoir les notifications sur iPhone, tu dois d'abord <strong>installer l'app</strong> :</p>
+      <div class="ios-steps">
+        <div class="ios-step"><span class="n">1</span><span>Appuie sur le bouton Partager <strong>⎙</strong> en bas de Safari</span></div>
+        <div class="ios-step"><span class="n">2</span><span>Sélectionne <strong>"Sur l'écran d'accueil"</strong></span></div>
+        <div class="ios-step"><span class="n">3</span><span>Ouvre l'app depuis ton écran d'accueil</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Ton prénom</label>
+      <input id="name-input" type="text" placeholder="Ex: Alice" maxlength="20" autocomplete="off" autocorrect="off">
+    </div>
+    <div class="field">
+      <label>Code de la salle</label>
+      <input id="room-input" type="text" placeholder="Ex: monsecret42" maxlength="50" autocomplete="off" autocorrect="off" autocapitalize="none">
+    </div>
+
+    <button class="btn-primary" onclick="joinRoom()">Entrer dans la salle →</button>
+
+    <div class="divider"><span>ou</span></div>
+
+    <button class="btn-secondary" onclick="generateCode()">🎲 Générer un code aléatoire</button>
+  </div>
+</div>
+
+<!-- ══ CHAT SCREEN ══ -->
+<div id="chat">
+  <div id="header">
+    <div class="header-left">
+      <div id="status-dot"></div>
+      <div>
+        <div id="room-name"></div>
+        <div id="status-text">connexion…</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button id="notif-btn" onclick="toggleNotif()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span id="notif-label">Activer</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="messages">
+    <div id="empty">
+      <div class="icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      début de la conversation
+    </div>
+  </div>
+
+  <div id="typing"></div>
+
+  <div id="input-bar">
+    <textarea id="input" placeholder="Message…" rows="1" maxlength="2000"></textarea>
+    <button id="send-btn" onclick="sendMsg()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ══════════════════════════════════════════
+//  CONFIG — remplace ces 3 valeurs
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://hoezdngcqyfjgaaqtziq.supabase.co';
+const SUPABASE_ANON   = 'sb_publishable_owaEng5yjTnfKZgbpb8Gvw_VcWu_mTW';
+const VAPID_PUBLIC    = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
+// ══════════════════════════════════════════
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let myName = '', roomId = '', swReg = null, pushEnabled = false;
+let typingTimer = null, isTyping = false;
+let lastDate = null;
+
+// ── Détection iOS/Android ──
+const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+const isAndroid = /android/i.test(navigator.userAgent);
+
+// ── Init Service Worker ──
+window.addEventListener('load', async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      console.log('SW registered');
+    } catch(e) {
+      console.error('SW failed:', e);
+    }
+  }
+
+  // Sur iOS pas installé → montrer le guide
+  if (isIOS && !isStandalone) {
+    document.getElementById('ios-prompt').classList.add('visible');
+  }
+
+  // Restaurer session
+  const savedName = localStorage.getItem('chat_name');
+  const savedRoom = localStorage.getItem('chat_room');
+  if (savedName) document.getElementById('name-input').value = savedName;
+  if (savedRoom) document.getElementById('room-input').value = savedRoom;
+});
+
+// ── Setup ──
+function generateCode() {
+  const code = Math.random().toString(36).slice(2, 6) + '-' + Math.random().toString(36).slice(2, 6);
+  document.getElementById('room-input').value = code;
+  document.getElementById('room-input').focus();
+}
+
+async function joinRoom() {
+  myName = document.getElementById('name-input').value.trim();
+  roomId = document.getElementById('room-input').value.trim().toLowerCase().replace(/[\s_]+/g, '-');
+
+  if (!myName) { document.getElementById('name-input').focus(); return; }
+  if (!roomId) { document.getElementById('room-input').focus(); return; }
+  if (myName.length < 1 || roomId.length < 2) return;
+
+  localStorage.setItem('chat_name', myName);
+  localStorage.setItem('chat_room', roomId);
+
+  document.getElementById('setup').classList.add('hide');
+
+  const chat = document.getElementById('chat');
+  chat.classList.add('visible');
+  document.getElementById('room-name').textContent = '# ' + roomId;
+
+  await initChat();
+  await setupPush();
+}
+
+// ── Chat init ──
+async function initChat() {
+  // Charger historique
+  const { data, error } = await sb
+    .from('messages')
+    .select('*')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true });
+
+  if (data && data.length > 0) {
+    document.getElementById('empty').classList.add('hidden');
+    data.forEach(m => renderMsg(m, false));
+    scrollDown();
+  }
+
+  // Écouter nouveaux messages en temps réel
+  sb.channel('room:' + roomId)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `room_id=eq.${roomId}`
+    }, payload => {
+      document.getElementById('empty').classList.add('hidden');
+      renderMsg(payload.new, true);
+      scrollDown();
+    })
+    .on('presence', { event: 'sync' }, () => {})
+    .subscribe(status => {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      if (status === 'SUBSCRIBED') {
+        dot.className = 'online';
+        txt.textContent = 'connecté';
+      } else {
+        dot.className = '';
+        txt.textContent = 'reconnexion…';
+      }
+    });
+}
+
+// ── Rendu message ──
+function renderMsg(msg, animate) {
+  const isMine = msg.sender === myName;
+  const dateStr = formatDate(new Date(msg.created_at));
+
+  // Séparateur de date
+  if (dateStr !== lastDate) {
+    lastDate = dateStr;
+    const sep = document.createElement('div');
+    sep.className = 'date-sep';
+    sep.innerHTML = `<span>${dateStr}</span>`;
+    document.getElementById('messages').appendChild(sep);
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + (isMine ? 'me' : 'them');
+  if (!animate) wrap.style.animation = 'none';
+
+  const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  if (!isMine) {
+    const sender = document.createElement('div');
+    sender.className = 'msg-sender';
+    sender.textContent = msg.sender;
+    wrap.appendChild(sender);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg';
+  bubble.textContent = msg.content;
+  wrap.appendChild(bubble);
+
+  const t = document.createElement('div');
+  t.className = 'msg-time';
+  t.textContent = time;
+  wrap.appendChild(t);
+
+  document.getElementById('messages').appendChild(wrap);
+}
+
+// ── Envoi message ──
+async function sendMsg() {
+  const input = document.getElementById('input');
+  const content = input.value.trim();
+  if (!content) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  input.focus();
+
+  document.getElementById('send-btn').disabled = true;
+
+  await sb.from('messages').insert({
+    room_id: roomId,
+    content: content,
+    sender: myName
+  });
+
+  // Appeler la Edge Function pour push
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON}`
+      },
+      body: JSON.stringify({ room_id: roomId, sender: myName, content })
+    });
+  } catch(e) {}
+
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ── Auto-resize textarea ──
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('input');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
+    }
+  });
+});
+
+// ── Push notifications ──
+async function setupPush() {
+  if (!swReg || !('PushManager' in window)) {
+    document.getElementById('notif-btn').classList.add('hidden');
+    return;
+  }
+
+  // Vérifier si déjà abonné
+  const existing = await swReg.pushManager.getSubscription();
+  if (existing) {
+    pushEnabled = true;
+    updateNotifBtn(true);
+    await saveSub(existing);
+  }
+}
+
+async function toggleNotif() {
+  if (pushEnabled) {
+    // Désactiver
+    const sub = await swReg.pushManager.getSubscription();
+    if (sub) {
+      await sub.unsubscribe();
+      await sb.from('push_subscriptions').delete()
+        .eq('room_id', roomId).eq('sender_name', myName);
+    }
+    pushEnabled = false;
+    updateNotifBtn(false);
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    alert('Permission refusée. Active les notifications dans les réglages de ton navigateur.');
+    return;
+  }
+
+  try {
+    const sub = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+    });
+    await saveSub(sub);
+    pushEnabled = true;
+    updateNotifBtn(true);
+  } catch(e) {
+    console.error('Push subscribe failed:', e);
+    if (isIOS && !isStandalone) {
+      alert('Sur iPhone, tu dois d\'abord ajouter cette page à ton écran d\'accueil (bouton Partager → Sur l\'écran d\'accueil), puis la rouvrir.');
+    }
+  }
+}
+
+async function saveSub(sub) {
+  await sb.from('push_subscriptions').upsert({
+    room_id: roomId,
+    sender_name: myName,
+    subscription: sub.toJSON()
+  }, { onConflict: 'room_id,sender_name' });
+}
+
+function updateNotifBtn(enabled) {
+  const btn = document.getElementById('notif-btn');
+  const label = document.getElementById('notif-label');
+  btn.className = enabled ? 'enabled' : '';
+  label.textContent = enabled ? 'Notifs ON' : 'Activer';
+}
+
+// ── Utils ──
+function scrollDown() {
+  const el = document.getElementById('messages');
+  requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+}
+
+function formatDate(d) {
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Aujourd\'hui';
+  if (d.toDateString() === yesterday.toDateString()) return 'Hier';
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+</script>
+</body>
+</html>
