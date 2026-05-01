@@ -595,9 +595,7 @@ window.addEventListener('load', async () => {
   }
 
   // Sur iOS pas installé → montrer le guide
-  if (isIOS && !isStandalone) {
-    document.getElementById('ios-prompt').classList.add('visible');
-  }
+  // ios prompt disabled
 
   // Restaurer session
   const savedName = localStorage.getItem('chat_name');
