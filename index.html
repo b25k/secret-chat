@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Chat Secret">
+  <meta name="apple-mobile-web-app-title" content="Secret Chat">
   <meta name="theme-color" id="theme-color-meta" content="#0a0a0a">
-  <title>Chat Secret</title>
+  <title>Secret Chat</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -360,6 +360,7 @@
     <h1 class="setup-title">Chat <strong>secret</strong></h1>
 
     
+
     <!-- Saved rooms -->
     <div id="rooms-list"></div>
 
@@ -465,10 +466,9 @@
 //  CONFIG
 // ══════════════════════════════════════════
 const SUPABASE_URL  = 'https://hoezdngcqyfjgaaqtziq.supabase.co';
-const SUPABASE_ANON = 'VOTRE_ANON_KEY';
-const VAPID_PUBLIC  = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
+const SUPABASE_ANON   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvZXpkbmdjcXlmamdhYXF0emlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzU3NjksImV4cCI6MjA5MzE1MTc2OX0.rXCChe545m-tJQ76zv2Hu0B2I3VLdfVOo_p32Z9X3f4';
+const VAPID_PUBLIC    = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
 // ══════════════════════════════════════════
-
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
