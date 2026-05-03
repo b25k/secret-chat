@@ -43,7 +43,7 @@ self.addEventListener('push', event => {
   event.waitUntil(
     // Check if app is open AND visible (not just open in background)
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      const appIsVisible = list.some(c => !c.hidden && c.visibilityState !== 'hidden');
+      const appIsVisible = list.some(c => c.focused === true);
 
       // If app is open and the user is actively looking at it → skip notification
       if (appIsVisible) return;
