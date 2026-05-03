@@ -359,7 +359,6 @@
     </div>
     <h1 class="setup-title">Chat <strong>secret</strong></h1>
 
-    
 
     <!-- Saved rooms -->
     <div id="rooms-list"></div>
@@ -469,6 +468,7 @@ const SUPABASE_URL  = 'https://hoezdngcqyfjgaaqtziq.supabase.co';
 const SUPABASE_ANON   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvZXpkbmdjcXlmamdhYXF0emlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzU3NjksImV4cCI6MjA5MzE1MTc2OX0.rXCChe545m-tJQ76zv2Hu0B2I3VLdfVOo_p32Z9X3f4';
 const VAPID_PUBLIC    = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
 // ══════════════════════════════════════════
+
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -599,10 +599,19 @@ async function joinRoom() {
   await initChat();
   await setupPush();
 
-  // Mark messages as read when app focused
+  // Tell SW when app is focused → suppress push notifications when open
+  function notifySW(focused) {
+    if (swReg && swReg.active) {
+      swReg.active.postMessage({ type: 'APP_FOCUSED', focused });
+    }
+  }
+  notifySW(true);
   document.addEventListener('visibilitychange', () => {
+    notifySW(!document.hidden);
     if (!document.hidden) markAllRead();
   });
+  window.addEventListener('focus', () => notifySW(true));
+  window.addEventListener('blur', () => notifySW(false));
 }
 
 function backToSetup() {
