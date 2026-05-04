@@ -32,39 +32,43 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// Track if app is in foreground (set by the app via postMessage)
+self.appFocused = false;
+
+// ── App tells SW its focus state ──
+self.addEventListener('message', event => {
+  if (event.data?.type === 'APP_FOCUSED') {
+    self.appFocused = event.data.focused;
+  }
+});
+
 // ── Push received ──
 self.addEventListener('push', event => {
   if (!event.data) return;
 
   let payload;
   try { payload = event.data.json(); }
-  catch(e) { payload = { sender: 'Message', content: event.data.text() }; }
+  catch(e) { payload = { sender: 'New message', content: event.data.text() }; }
+
+  // If app told us it's in foreground → skip notification
+  if (self.appFocused) return;
 
   event.waitUntil(
-    // Check if app is open AND visible (not just open in background)
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      const appIsVisible = list.some(c => c.focused === true);
-
-      // If app is open and the user is actively looking at it → skip notification
-      if (appIsVisible) return;
-
-      // Otherwise show the notification
-      return self.registration.showNotification(payload.sender || 'New message', {
-        body: payload.content || '',
-        icon: '/icons/icon-192.png',
-        badge: '/icons/badge-72.png',
-        vibrate: [100, 50, 100],
-        tag: 'chat-' + (payload.room_id || 'msg'),
-        renotify: true,
-        requireInteraction: false,
-        silent: false,
-        data: {
-          url: self.registration.scope,
-          sender: payload.sender,
-          room: payload.room_id
-        },
-        actions: [{ action: 'open', title: 'Open' }]
-      });
+    self.registration.showNotification(payload.sender || 'New message', {
+      body: payload.content || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/badge-72.png',
+      vibrate: [100, 50, 100],
+      tag: 'chat-' + (payload.room_id || 'msg'),
+      renotify: true,
+      requireInteraction: false,
+      silent: false,
+      data: {
+        url: self.registration.scope,
+        sender: payload.sender,
+        room: payload.room_id
+      },
+      actions: [{ action: 'open', title: 'Open' }]
     })
   );
 });
@@ -81,13 +85,6 @@ self.addEventListener('notificationclick', event => {
       if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
-});
-
-// ── App tells SW when it's focused/unfocused ──
-self.addEventListener('message', event => {
-  if (event.data?.type === 'APP_FOCUSED') {
-    self.appFocused = event.data.focused;
-  }
 });
 
 self.addEventListener('pushsubscriptionchange', event => {
