@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-title" content="Secret Chat">
   <meta name="theme-color" id="theme-color-meta" content="#0a0a0a">
   <title>Secret Chat</title>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8005559376402872" crossorigin="anonymous"></script>
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -345,6 +347,9 @@
     }
     #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
+
+    /* AD BANNER */
+    #ad-banner { flex-shrink: 0; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 60px; overflow: hidden; }
     .hidden { display:none !important; }
   </style>
 </head>
@@ -355,25 +360,33 @@
   <div class="setup-inner">
     <div class="setup-logo">
       <div class="dot"></div>
-      <span>Canal privé</span>
+      <span>Private channel</span>
     </div>
-    <h1 class="setup-title">Chat <strong>secret</strong></h1>
+    <h1 class="setup-title">Secret <strong>chat</strong></h1>
 
+    <div id="ios-prompt">
+      <p>Pour recevoir les notifications sur iPhone, tu dois d'abord <strong>installer l'app</strong> :</p>
+      <div class="ios-steps">
+        <div class="ios-step"><span class="n">1</span><span>Appuie sur le bouton Partager <strong>⎙</strong> en bas de Safari</span></div>
+        <div class="ios-step"><span class="n">2</span><span>Sélectionne <strong>"Sur l'écran d'accueil"</strong></span></div>
+        <div class="ios-step"><span class="n">3</span><span>Ouvre l'app depuis ton écran d'accueil</span></div>
+      </div>
+    </div>
 
     <!-- Saved rooms -->
     <div id="rooms-list"></div>
 
     <div class="field">
-      <label>Ton prénom</label>
+      <label>Your name</label>
       <input id="name-input" type="text" placeholder="Ex: Alice" maxlength="20" autocomplete="off" autocorrect="off">
     </div>
     <div class="field">
-      <label>Code de la salle</label>
-      <input id="room-input" type="text" placeholder="Ex: monsecret42" maxlength="50" autocomplete="off" autocorrect="off" autocapitalize="none">
+      <label>Room code</label>
+      <input id="room-input" type="text" placeholder="Ex: mysecret42" maxlength="50" autocomplete="off" autocorrect="off" autocapitalize="none">
     </div>
-    <button class="btn-primary" onclick="joinRoom()">Entrer dans la salle →</button>
+    <button class="btn-primary" onclick="joinRoom()">Enter room →</button>
     <div class="divider"><span>ou</span></div>
-    <button class="btn-secondary" onclick="generateCode()">🎲 Générer un code aléatoire</button>
+    <button class="btn-secondary" onclick="generateCode()">🎲 Generate random code</button>
   </div>
 </div>
 
@@ -383,18 +396,18 @@
     <div class="header-left">
       <div id="status-dot"></div>
       <div>
-        <div id="room-name" onclick="backToSetup()" title="Changer de salle"></div>
-        <div id="status-text">connexion…</div>
+        <div id="room-name" onclick="backToSetup()" title="Change room"></div>
+        <div id="status-text">connecting…</div>
       </div>
     </div>
     <div class="header-right">
       <!-- Auto-delete -->
-      <button class="icon-btn" id="autodel-btn" onclick="openAutodelModal()" title="Suppression auto">
+      <button class="icon-btn" id="autodel-btn" onclick="openAutodelModal()" title="Auto-delete">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span id="autodel-label">∞</span>
       </button>
       <!-- Theme toggle -->
-      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Changer thème">
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">
         <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
       <!-- Notifications -->
@@ -405,12 +418,23 @@
     </div>
   </div>
 
+  <!-- Ad banner -->
+  <div id="ad-banner">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8005559376402872"
+         data-ad-slot="AUTO"
+         data-ad-format="horizontal"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
   <div id="messages">
     <div id="empty">
       <div class="icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
-      début de la conversation
+      start of conversation
     </div>
   </div>
 
@@ -418,7 +442,7 @@
 
   <!-- Edit bar -->
   <div id="edit-bar">
-    <span id="edit-label">✏️ Mode édition</span>
+    <span id="edit-label">✏️ Editing…</span>
     <button id="edit-cancel" onclick="cancelEdit()">✕</button>
   </div>
 
@@ -445,14 +469,14 @@
 <!-- Auto-delete modal -->
 <div id="autodel-modal">
   <div class="modal-box">
-    <h3>⏱ Suppression automatique</h3>
+    <h3>⏱ Auto-delete messages</h3>
     <div class="modal-options">
-      <div class="modal-opt" data-val="0" onclick="setAutodel(0)">Jamais (par défaut)</div>
-      <div class="modal-opt" data-val="3600" onclick="setAutodel(3600)">1 heure</div>
-      <div class="modal-opt" data-val="86400" onclick="setAutodel(86400)">24 heures</div>
-      <div class="modal-opt" data-val="604800" onclick="setAutodel(604800)">7 jours</div>
+      <div class="modal-opt" data-val="0" onclick="setAutodel(0)">Never (default)</div>
+      <div class="modal-opt" data-val="3600" onclick="setAutodel(3600)">1 hour</div>
+      <div class="modal-opt" data-val="86400" onclick="setAutodel(86400)">24 hours</div>
+      <div class="modal-opt" data-val="604800" onclick="setAutodel(604800)">7 days</div>
     </div>
-    <button class="modal-cancel" onclick="closeAutodelModal()">Annuler</button>
+    <button class="modal-cancel" onclick="closeAutodelModal()">Cancel</button>
   </div>
 </div>
 
@@ -465,8 +489,8 @@
 //  CONFIG
 // ══════════════════════════════════════════
 const SUPABASE_URL  = 'https://hoezdngcqyfjgaaqtziq.supabase.co';
-const SUPABASE_ANON   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvZXpkbmdjcXlmamdhYXF0emlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzU3NjksImV4cCI6MjA5MzE1MTc2OX0.rXCChe545m-tJQ76zv2Hu0B2I3VLdfVOo_p32Z9X3f4';
-const VAPID_PUBLIC    = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
+const SUPABASE_ANON = 'VOTRE_ANON_KEY';
+const VAPID_PUBLIC  = 'BJWwPuYeKXdHLOf4H3BwZR2LTisudDUzM7iEcsHdcgrloDDlPsiwTyEE4QfirQ8gFOR3sT5_G9y6tw65vI1vyQM';
 // ══════════════════════════════════════════
 
 const { createClient } = supabase;
@@ -539,7 +563,7 @@ function renderRoomsList() {
     div.innerHTML = `
       <div class="room-item-left" onclick="quickJoin('${r.name}','${r.room}')">
         <div class="room-item-name">${r.name} <span style="color:var(--text-muted);font-size:11px;font-family:'DM Mono',monospace">→ #${r.room}</span></div>
-        <div class="room-item-sub">Appuie pour rejoindre</div>
+        <div class="room-item-sub">Tap to join</div>
       </div>
       <button class="room-item-del" onclick="deleteRoom('${r.room}')">✕</button>
     `;
@@ -619,7 +643,7 @@ function backToSetup() {
   sb.removeAllChannels();
   document.getElementById('chat').classList.remove('visible');
   document.getElementById('setup').classList.remove('hide');
-  document.getElementById('messages').innerHTML = '<div id="empty"><div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>début de la conversation</div>';
+  document.getElementById('messages').innerHTML = '<div id="empty"><div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>start of conversation</div>';
   lastDate = null;
   renderRoomsList();
 }
@@ -658,7 +682,7 @@ async function initChat() {
       const dot = document.getElementById('status-dot');
       const txt = document.getElementById('status-text');
       dot.className = status === 'SUBSCRIBED' ? 'online' : '';
-      txt.textContent = status === 'SUBSCRIBED' ? 'connecté' : 'reconnexion…';
+      txt.textContent = status === 'SUBSCRIBED' ? 'connected' : 'reconnecting…';
     });
 
   // Auto-delete check
@@ -684,7 +708,7 @@ function renderMsg(msg, animate) {
   if (!animate) wrap.style.animation = 'none';
   if (msg.deleted) wrap.classList.add('deleted');
 
-  const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  const time = new Date(msg.created_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 
   if (!isMine) {
     const senderEl = document.createElement('div');
@@ -703,7 +727,7 @@ function renderMsg(msg, animate) {
 
   const bubble = document.createElement('div');
   bubble.className = 'msg' + (msg.deleted ? ' deleted-msg' : '');
-  bubble.textContent = msg.deleted ? 'Message supprimé' : msg.content;
+  bubble.textContent = msg.deleted ? 'Message deleted' : msg.content;
   wrap.appendChild(bubble);
 
   // Footer: time + read tick + edited
@@ -712,7 +736,7 @@ function renderMsg(msg, animate) {
   if (msg.edited && !msg.deleted) {
     const ed = document.createElement('span');
     ed.className = 'edited-badge';
-    ed.textContent = 'modifié';
+    ed.textContent = 'edited';
     footer.appendChild(ed);
   }
   const timeEl = document.createElement('span');
@@ -767,7 +791,7 @@ function updateMsgInDOM(msg) {
 
   const bubble = wrap.querySelector('.msg');
   if (bubble) {
-    bubble.textContent = msg.deleted ? 'Message supprimé' : msg.content;
+    bubble.textContent = msg.deleted ? 'Message deleted' : msg.content;
     bubble.className = 'msg' + (msg.deleted ? ' deleted-msg' : '');
   }
 
@@ -778,7 +802,7 @@ function updateMsgInDOM(msg) {
     if (msg.edited && !msg.deleted) {
       if (!existEd) {
         const ed = document.createElement('span');
-        ed.className = 'edited-badge'; ed.textContent = 'modifié';
+        ed.className = 'edited-badge'; ed.textContent = 'edited';
         footer.insertBefore(ed, footer.firstChild);
       }
     } else if (existEd) existEd.remove();
@@ -820,13 +844,13 @@ function showCtxMenu(e, msg, wrap) {
   const menu = document.getElementById('ctx-menu');
   let items = '';
 
-  items += `<div class="ctx-item" onclick="showEmojiBar(event, '${msg.id}')"><span class="ci">😊</span> Réagir</div>`;
-  items += `<div class="ctx-item" onclick="copyMsg('${msg.id}')"><span class="ci">📋</span> Copier</div>`;
-  items += `<div class="ctx-item" onclick="replyTo('${msg.id}')"><span class="ci">↩️</span> Répondre</div>`;
+  items += `<div class="ctx-item" onclick="showEmojiBar(event, '${msg.id}')"><span class="ci">😊</span> React</div>`;
+  items += `<div class="ctx-item" onclick="copyMsg('${msg.id}')"><span class="ci">📋</span> Copy</div>`;
+  items += `<div class="ctx-item" onclick="replyTo('${msg.id}')"><span class="ci">↩️</span> Reply</div>`;
 
   if (isMine) {
-    items += `<div class="ctx-item" onclick="startEdit('${msg.id}')"><span class="ci">✏️</span> Modifier</div>`;
-    items += `<div class="ctx-item danger" onclick="deleteMsg('${msg.id}')"><span class="ci">🗑</span> Supprimer</div>`;
+    items += `<div class="ctx-item" onclick="startEdit('${msg.id}')"><span class="ci">✏️</span> Edit</div>`;
+    items += `<div class="ctx-item danger" onclick="deleteMsg('${msg.id}')"><span class="ci">🗑</span> Delete</div>`;
   }
 
   menu.innerHTML = items;
@@ -884,7 +908,7 @@ function copyMsg(msgId) {
   const wrap = document.querySelector(`.msg-wrap[data-id="${msgId}"]`);
   const bubble = wrap?.querySelector('.msg');
   if (bubble) {
-    navigator.clipboard.writeText(bubble.textContent).then(() => showToast('✓ Copié'));
+    navigator.clipboard.writeText(bubble.textContent).then(() => showToast('✓ Copied'));
   }
 }
 
@@ -923,7 +947,7 @@ function startEdit(msgId) {
   const input = document.getElementById('input');
   input.value = bubble.textContent;
   input.focus();
-  document.getElementById('edit-label').textContent = '✏️ Modification en cours…';
+  document.getElementById('edit-label').textContent = '✏️ Editing…';
   document.getElementById('edit-bar').classList.add('visible');
 }
 
@@ -1014,7 +1038,7 @@ function setAutodel(seconds) {
   updateAutodelBtn();
   closeAutodelModal();
   if (seconds > 0) scheduleAutoDelete();
-  showToast(seconds === 0 ? '∞ Pas de suppression auto' : `⏱ Suppression après ${formatDuration(seconds)}`);
+  showToast(seconds === 0 ? '∞ No auto-delete' : `⏱ Delete after ${formatDuration(seconds)}`);
 }
 function updateAutodelBtn() {
   const btn = document.getElementById('autodel-btn');
@@ -1052,14 +1076,14 @@ async function toggleNotif() {
     pushEnabled = false; updateNotifBtn(false); return;
   }
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') { showToast('❌ Permission refusée'); return; }
+  if (permission !== 'granted') { showToast('❌ Permission denied'); return; }
   if (isIOS && !isStandalone) { document.getElementById('ios-prompt').classList.add('visible'); return; }
   try {
     const sub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC) });
     await saveSub(sub);
     pushEnabled = true; updateNotifBtn(true);
-    showToast('🔔 Notifications activées');
-  } catch(e) { console.error(e); showToast('❌ Erreur push'); }
+    showToast('🔔 Notifications enabled');
+  } catch(e) { console.error(e); showToast('❌ Push error'); }
 }
 
 async function saveSub(sub) {
@@ -1084,8 +1108,8 @@ function scrollDown() { const el=document.getElementById('messages'); requestAni
 function formatDate(d) {
   const today=new Date(); const yesterday=new Date(today); yesterday.setDate(today.getDate()-1);
   if(d.toDateString()===today.toDateString()) return "Aujourd'hui";
-  if(d.toDateString()===yesterday.toDateString()) return 'Hier';
-  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+  if(d.toDateString()===yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([],{day:'numeric',month:'long'});
 }
 function urlBase64ToUint8Array(b64) {
   const padding='='.repeat((4-b64.length%4)%4);
